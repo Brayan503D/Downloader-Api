@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 import requests
 import re
+import html
 
 app = Flask(__name__)
 
@@ -12,7 +13,11 @@ def get_tiktok_video_url(url):
         response = requests.get(url, headers=headers)
         video_url = re.search(r'playAddr":"(.*?)"', response.text)
         if video_url:
-            return video_url.group(1).replace("\\u0026", "&").replace("\\", "")
+            # Desescapa \u002F y otros caracteres
+            raw_url = video_url.group(1)
+            decoded_url = raw_url.replace("\\u0026", "&").replace("\\", "")
+            decoded_url = html.unescape(decoded_url)  # decodifica cualquier entidad HTML
+            return decoded_url
         return None
     except Exception as e:
         return None
